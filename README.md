@@ -43,6 +43,28 @@ El objetivo es analizar cómo las condiciones meteorológicas, en particular los
 2. **Análisis de Correlación**: Identificación de las variables relevantes y su relación con el tiempo de viaje.
 3. **Prueba de Hipótesis**: Realización de una prueba t para comparar la duración de los viajes en días lluviosos y no lluviosos.
 
+## Consulta SQL
+
+Para obtener los datos necesarios, se realizó una consulta SQL que selecciona los viajes realizados en los días sábados en los cuales el clima es lluvioso o no, y se asocia con las condiciones meteorológicas. La consulta se ejecuta sobre las tablas `trips` y `weather_records`:
+
+SELECT 
+    t.start_ts, 
+    CASE 
+        WHEN LOWER(w.description) LIKE '%rain%' OR LOWER(w.description) LIKE '%storm%' THEN 'Bad'
+        ELSE 'Good'
+    END AS weather_conditions,
+    t.duration_seconds
+FROM 
+    trips t
+JOIN 
+    weather_records w ON DATE_TRUNC('hour', t.start_ts) = DATE_TRUNC('hour', w.ts)
+WHERE 
+    t.pickup_location_id = 50  -- Loop
+    AND t.dropoff_location_id = 63  -- O'Hare
+    AND EXTRACT(DOW FROM t.start_ts) = 6  -- Saturday (DOW: 6 represents Saturday)
+ORDER BY 
+    t.trip_id;
+
 ## Conclusión
 
 Se formuló una **hipótesis nula (H₀)** bajo la suposición de que **no hay diferencia en el tiempo promedio de viaje entre los días lluviosos y no lluviosos**. Por otro lado, la **hipótesis alternativa (H₁)** sugiere que **sí existe una diferencia en el tiempo promedio de viaje** entre ambos tipos de días.
